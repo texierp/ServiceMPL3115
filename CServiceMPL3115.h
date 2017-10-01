@@ -22,7 +22,7 @@ public:
     Q_INVOKABLE bool loopIsEnabled();
 
 protected:
-    QByteArray readValueFromFile(QString filePath);
+    qint8 readValueFromFile(QString filePath, QByteArray &data);
 
 private:
     QTimer *m_timer;

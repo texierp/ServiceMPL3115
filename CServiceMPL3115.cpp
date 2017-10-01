@@ -78,10 +78,8 @@ bool CServiceMPL3115::loopIsEnabled()
  * @param filePath
  * @return
  */
-QByteArray CServiceMPL3115::readValueFromFile(QString filePath)
+qint8 CServiceMPL3115::readValueFromFile(QString filePath, QByteArray &data)
 {
-    QByteArray data;
-
     QFile file(filePath);
     if (file.open(QIODevice::ReadOnly))
     {
@@ -89,9 +87,12 @@ QByteArray CServiceMPL3115::readValueFromFile(QString filePath)
         data.remove(data.length() - 1, 1);
         file.close();
     }
-    else qDebug()<<"Error while opening "<<filePath;
-
-    return data;
+    else
+    {
+        qDebug()<<"Error while opening "<<filePath;
+        return -1;
+    }
+    return 0;
 }
 
 /**
@@ -102,11 +103,38 @@ void CServiceMPL3115::eventLoop()
     if (!m_enabled)
         return;
 
-    QByteArray rawTemp = readValueFromFile("/sys/bus/iio/devices/iio\:device0/in_temp_raw");
-    QByteArray scaleTemp = readValueFromFile("/sys/bus/iio/devices/iio\:device0/in_temp_scale");
+    bool ret;
+
+    /**
+      * Temperature
+      */
+    QByteArray rawTemp, scaleTemp;
+
+    if ( (ret = readValueFromFile("/sys/bus/iio/devices/iio\:device0/in_temp_raw", rawTemp)) !=0 )
+    {
+        qDebug()<<"Error with rawTemp";
+    }
+
+    if ( (ret = readValueFromFile("/sys/bus/iio/devices/iio\:device0/in_temp_scale", scaleTemp)) !=0 )
+    {
+        qDebug()<<"Error with scaleTemp";
+    }
 
     m_temperature = rawTemp.toInt() * scaleTemp.toDouble();
 
-    qDebug()<<m_temperature;
+    /**
+      * Pressure
+      */
+    QByteArray rawPressure, scalePressure;
 
+    if ( (ret = readValueFromFile("/sys/bus/iio/devices/iio\:device0/in_pressure_raw", rawPressure)) !=0 )
+    {
+        qDebug()<<"Error with rawPressure";
+    }
+    if ( (ret = readValueFromFile("/sys/bus/iio/devices/iio\:device0/in_pressure_scale", scalePressure)) !=0 )
+    {
+        qDebug()<<"Error with scalePressure";
+    }
+
+    m_pressure = rawPressure.toInt() * scalePressure.toDouble();
 }
