@@ -18,13 +18,17 @@ public:
 
     Q_INVOKABLE double getTemperature() const;
     Q_INVOKABLE double getPressure() const;
+    Q_INVOKABLE void enableLoop(bool value);
+    Q_INVOKABLE bool loopIsEnabled();
 
-private:
+protected:
     QByteArray readValueFromFile(QString filePath);
 
+private:
     QTimer *m_timer;
     double m_temperature;
     double m_pressure;
+    bool m_enabled;
 
 protected slots:
     void eventLoop();
